@@ -1,0 +1,26 @@
+Default Robot Main Program
+--------------------------------
+
+This sample implements the "default program" that was preloaded on
+your cRIO when it came from the factory. This program has both Autonomous
+and Operator Control code as described in the "Out of the box" directions.
+
+You can use this as a slightly more advanced template as a starting point
+for your own robot projects, or just to see how some more advanced programming
+works.
+
+
+Programmers Todo (in order of priority):
+* Update the laptops with SVN and windriver
+* Decide what the smaller sub systems will be
+* Simple Drive
+* Auto Gathering
+* Simple Scoring
+* Auto-Mode
+* Assisted Traction Control
+* Assisted Camera Drive
+* Assisted Scoring
+* Make it do everything perfectly
+
+SVN Information:
+2009 Begun: Revision 4
