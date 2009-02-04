@@ -6,9 +6,22 @@
  * is the base of a robot application that will automatically call your
  * Autonomous and OperatorControl methods at the right time as controlled by the switches on
  * the driver station or the field controls.
+ * Secondary system code is almost complete. No autonomous                                                             
+  .--~*teu.       u+=~~~+u.                      u+=~~~+u.   
+ dF     988Nx   z8F      `8N.    .xn!~%x.      z8F      `8N. 
+d888b   `8888> d88L       98E   x888   888.   d88L       98E 
+?8888>  98888F 98888bu.. .@*   X8888   8888:  98888bu.. .@*  
+ "**"  x88888~ "88888888NNu.   88888   X8888  "88888888NNu.  
+      d8888*`   "*8888888888i  88888   88888>  "*8888888888i 
+    z8**"`   :  .zf""*8888888L `8888  :88888X  .zf""*8888888L
+  :?.....  ..F d8F      ^%888E   `"**~ 88888> d8F      ^%888E
+ <""888888888~ 88>        `88~  .xx.   88888  88>        `88~
+ 8:  "888888*  '%N.       d*"  '8888>  8888~  '%N.       d*" 
+ ""    "**"`      ^"====="`     888"  :88%       ^"====="`   
+                                 ^"===""                 								 
  */
 
-int x;
+int x;  //variable only here so the code compiles
 class DefaultRobot : public SimpleRobot
 {
 	RobotDrive *myRobot;			// robot drive system
@@ -26,6 +39,7 @@ class DefaultRobot : public SimpleRobot
 	Relay *mybottomspinner;
 	Relay *mycompressor;
 	DigitalInput *mycheckball;
+	Timer *mytimer;
 	
 
 	enum							// Driver Station jumpers to control program operation
@@ -39,8 +53,7 @@ class DefaultRobot : public SimpleRobot
 		conveyerbelt = 3,
 		topspinner = 4,
 		bottomspinner =4,
-		compressor =6,
-		openhatch =7
+
 		
 	}pwms;
 	enum                              //all fake values
@@ -66,7 +79,7 @@ public:
 		myRobot = new RobotDrive(rightdrive, leftdrive);
 		rightStick = new Joystick(1);			// create the joysticks
 		leftStick = new Joystick(2);
-// these channel are all controlled by enum but may need slot val
+	// these channel are all controlled by enum but may need slot val
 		mycheckball = new DigitalInput(x);
 		myrightvictor = new Victor(rightdrive);
 		mytopspinner  = new Victor(topspinner);
@@ -75,6 +88,7 @@ public:
 		mycompressor = new Relay(compressor);
 		mybottomspinner = new Relay(bottomspinner);
 		myhatch = new Solenoid(openhatch);
+		mytimer = new Timer();
 
 		//Update the motors at least every 100ms.
 		GetWatchdog().SetExpiration(100);
@@ -103,7 +117,6 @@ public:
 	 */
 	void OperatorControl(void)
 	{
-		bool gathervariable = 0;
 		int beltstatus = 0; 
 		/*The beltstatus variable is to keep track of how the belt is set to be driven
 		 * 1 = up -1 =down 0 = neutral*/
@@ -121,16 +134,9 @@ public:
 				myRobot->ArcadeDrive(rightStick);	         // drive with arcade style (use right stick)
 			}
 			// beginning of the 2898 secondary system code
-			if (ds->GetDigitalIn(gatherswitch) == true)       //check to turn on gather
-			{
-				gathervariable = 1;
-				//todo relay output here
-			}
-			else
-			{
-				gathervariable =0;
-				//todo relay stop
-			}
+			
+				mybottomspinner->Set(Relay::kForward); //go forward 
+			
 			if (ds->GetDigitalIn(upswitch) == true)
 			{
 				myconveyerbelt->Set(.5);  // move belt up
@@ -138,7 +144,7 @@ public:
 			}
 			else {
 				myconveyerbelt->Set(0);  //stop belt
-				beltstatus = 0;
+				//beltstatus = 0;
 			}
 			if (ds->GetDigitalIn(downswitch) == true && ds->GetDigitalIn(upswitch)==false)
 			{ //if down is push and up is not pushed, proceed
@@ -148,26 +154,23 @@ public:
 			else
 			{
 				myconveyerbelt->Set(0); //stop belt
-			beltstatus = 0;
+				beltstatus = 0;
 			}
-			if (gathervariable == true)
-			{
-				if (mycheckball->Get() == true) //unsure if "get" works
+			
+			if (mycheckball->Get() == true) //unsure if "get" works
 				{
-					myconveyerbelt->Set(.5);
-					Wait(1);
-					myconveyerbelt->Set(beltstatus * .5);
+					myconveyerbelt->Set(.5);     //life ball up one slot
+					mytimer->Start();
+					
 				}
-			}
-			if (ds->GetDigitalIn(hatchswitch) == true)
+			
+			if (mytimer->Get() == 2)
 				{
-				//Todo: learn how to stop relay
+					myconveyerbelt->Set(beltstatus * .5); //set the conveyer belt back to its intended state
+					mytimer->Stop();
+					mytimer->Reset();
 				}
-			else
-			 	{
-				//Todo: learn how to stop relay
-				
-			 	}
+		
 		}
 	}
 };
