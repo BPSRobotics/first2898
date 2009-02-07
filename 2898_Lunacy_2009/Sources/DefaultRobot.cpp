@@ -52,7 +52,6 @@ class DefaultRobot : public SimpleRobot
 		leftdrive = 2,
 		conveyerbelt = 3,
 		topspinner = 4,
-		bottomspinner =4,
 
 		
 	}pwms;
@@ -85,9 +84,7 @@ public:
 		mytopspinner  = new Victor(topspinner);
 		myleftvictor = new Victor(leftdrive);
 		myconveyerbelt  = new Victor(conveyerbelt);
-		mycompressor = new Relay(compressor);
-		mybottomspinner = new Relay(bottomspinner);
-		myhatch = new Solenoid(openhatch);
+		mybottomspinner = new Relay(1); 
 		mytimer = new Timer();
 
 		//Update the motors at least every 100ms.
@@ -98,6 +95,7 @@ public:
 	/**
 	 * Drive left & right motors for 2 seconds, enabled by a jumper (jumper
 	 * must be in for autonomous to operate).
+	 * Currently programmed to drive forward and then turn right to block opponent
 	 */
 	void Autonomous(void)
 	{
@@ -106,7 +104,7 @@ public:
 		{
 			myRobot->Drive(0.5, 0.0);			// drive forwards half speed
 			Wait(2000);							//    for 2 seconds
-			myRobot->Drive(0.0, 0.0);			// stop robot
+			myRobot->Drive(0.9, .5 );			// stop robot
 		}
 		GetWatchdog().SetEnabled(true);
 	}
@@ -142,10 +140,7 @@ public:
 				myconveyerbelt->Set(.5);  // move belt up
 				beltstatus = 1;
 			}
-			else {
-				myconveyerbelt->Set(0);  //stop belt
-				//beltstatus = 0;
-			}
+			// the stopping of the main belt is controlled by next if check
 			if (ds->GetDigitalIn(downswitch) == true && ds->GetDigitalIn(upswitch)==false)
 			{ //if down is push and up is not pushed, proceed
 				myconveyerbelt->Set(-.5); //set belt down
@@ -170,8 +165,7 @@ public:
 					mytimer->Stop();
 					mytimer->Reset();
 				}
-		
+			
 		}
 	}
 };
-
