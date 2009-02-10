@@ -1,12 +1,9 @@
 #include "WPILib.h"
 
 /**
- * This is a demo program showing the use of the RobotBase class.
- * The SimpleRobot class get food for hot plate and bring back to me
- * is the base of a robot application that will automatically call your
- * Autonomous and OperatorControl methods at the right time as controlled by the switches on
- * the driver station or the field controls.
- * Secondary system code is almost complete. No autonomous                                                             
+ * Based on original default robot template
+ * Secondary system code is almost complete. No autonomous 
+ * Victor declarations are removed.... but the enums still exist...
   .--~*teu.       u+=~~~+u.                      u+=~~~+u.   
  dF     988Nx   z8F      `8N.    .xn!~%x.      z8F      `8N. 
 d888b   `8888> d88L       98E   x888   888.   d88L       98E 
@@ -22,17 +19,19 @@ d888b   `8888> d88L       98E   x888   888.   d88L       98E
  */
 
 int x;  //variable only here so the code compiles
+float slipcheck();
+float defaultbeltspeed = 5; //default convyerbelt speed
+
+float slipcheck(){
+	return 1.0;
+}
+
 class DefaultRobot : public SimpleRobot
 {
 	RobotDrive *myRobot;			// robot drive system
-	DigitalInput *armUpperLimit;	// arm upper limit switch
-	DigitalInput *armLowerLimit;	// arm lower limit switch
 	Joystick *rightStick;			// joystick 1 (arcade stick or right tank stick)
 	Joystick *leftStick;			// joystick 2 (tank left stick)
-	Joystick *armStick;				// joystick 3 to control arm
 	DriverStation *ds;				// driver station object
-	Victor *myrightvictor;
-	Victor *myleftvictor;
 	Victor *mytopspinner;
 	Victor *myconveyerbelt;
 	Solenoid *myhatch;
@@ -40,7 +39,9 @@ class DefaultRobot : public SimpleRobot
 	Relay *mycompressor;
 	DigitalInput *mycheckball;
 	Timer *mytimer;
-	
+	Accelerometer *myAccelerometer;
+	AnalogChannel *myPot;
+	DigitalInput *myPotRefresh;
 
 	enum							// Driver Station jumpers to control program operation
 	{ ARCADE_MODE = 1,				// Tank/Arcade jumper is on DS Input 1 (Jumper present is arcade)
@@ -79,14 +80,14 @@ public:
 		rightStick = new Joystick(1);			// create the joysticks
 		leftStick = new Joystick(2);
 	// these channel are all controlled by enum but may need slot val
-		mycheckball = new DigitalInput(x);
-		myrightvictor = new Victor(rightdrive);
-		mytopspinner  = new Victor(topspinner);
+		mycheckball = new DigitalInput(12);
 		myleftvictor = new Victor(leftdrive);
 		myconveyerbelt  = new Victor(conveyerbelt);
 		mybottomspinner = new Relay(1); 
 		mytimer = new Timer();
-
+		myAccelerometer = new Accelerometer(11); //need real val
+		myPot = new AnalogChannel(9);
+		myPotRefresh = new DigitalInput(10);
 		//Update the motors at least every 100ms.
 		GetWatchdog().SetExpiration(100);
 		
@@ -104,7 +105,7 @@ public:
 		{
 			myRobot->Drive(0.5, 0.0);			// drive forwards half speed
 			Wait(2000);							//    for 2 seconds
-			myRobot->Drive(0.9, .5 );			// stop robot
+			myRobot->Drive(0.0, 0.0 );			// stop robot
 		}
 		GetWatchdog().SetEnabled(true);
 	}
@@ -125,25 +126,26 @@ public:
 			// determine if tank or arcade mode; default with no jumper is for tank drive
 			if (ds->GetDigitalIn(ARCADE_MODE) == 0) 
 			{	
-				myRobot->TankDrive(leftStick, rightStick);	 // drive with tank style
+				myRobot->TankDrive(leftStick->GetY() * slipcheck(), rightStick->GetY() * slipcheck());	 // drive with tank style
 			} 
-			else
+			/* we are using Tankdrive
+			 * else 
 			{
 				myRobot->ArcadeDrive(rightStick);	         // drive with arcade style (use right stick)
-			}
+			}*/
 			// beginning of the 2898 secondary system code
 			
 				mybottomspinner->Set(Relay::kForward); //go forward 
 			
 			if (ds->GetDigitalIn(upswitch) == true)
 			{
-				myconveyerbelt->Set(.5);  // move belt up
+				myconveyerbelt->Set(defaultbeltspeed);  // move belt up
 				beltstatus = 1;
 			}
 			// the stopping of the main belt is controlled by next if check
 			if (ds->GetDigitalIn(downswitch) == true && ds->GetDigitalIn(upswitch)==false)
 			{ //if down is push and up is not pushed, proceed
-				myconveyerbelt->Set(-.5); //set belt down
+				myconveyerbelt->Set(-1 * defaultbeltspeed); //set belt down
 				beltstatus = -1;
 			}
 			else
@@ -152,20 +154,29 @@ public:
 				beltstatus = 0;
 			}
 			
-			if (mycheckball->Get() == true) //unsure if "get" works
+			if (mycheckball->Get() == true) 
+				//unsure if "get" works
 				{
-					myconveyerbelt->Set(.5);     //life ball up one slot
+					myconveyerbelt->Set(defaultbeltspeed);     //life ball up one slot
 					mytimer->Start();
 					
 				}
 			
 			if (mytimer->Get() == 2)
 				{
-					myconveyerbelt->Set(beltstatus * .5); //set the conveyer belt back to its intended state
+					myconveyerbelt->Set(beltstatus * defaultbeltspeed); //set the conveyer belt back to its intended state
 					mytimer->Stop();
 					mytimer->Reset();
 				}
-			
+			if (myPotRefresh->Get() == true)
+			{ // not final way to set pot
+				defaultbeltspeed = myPot->GetVoltage() /5;
+			}
 		}
 	}
 };
+
+START_ROBOT_CLASS(DefaultRobot);
+
+
+
