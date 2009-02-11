@@ -2,8 +2,7 @@
 
 /**
  * Based on original default robot template
- * Secondary system code is almost complete. No autonomous 
- * Victor declarations are removed.... but the enums still exist...
+ * Secondary system code is almost complete. No autonomous                                                             
   .--~*teu.       u+=~~~+u.                      u+=~~~+u.   
  dF     988Nx   z8F      `8N.    .xn!~%x.      z8F      `8N. 
 d888b   `8888> d88L       98E   x888   888.   d88L       98E 
@@ -18,13 +17,9 @@ d888b   `8888> d88L       98E   x888   888.   d88L       98E
                                  ^"===""                 								 
  */
 
-int x;  //variable only here so the code compiles
+//int x;  //variable only here so the code compiles
 float slipcheck();
-float defaultbeltspeed = 5; //default convyerbelt speed
-
-float slipcheck(){
-	return 1.0;
-}
+float defaultbeltspeed = .5; //default convyerbelt speed
 
 class DefaultRobot : public SimpleRobot
 {
@@ -32,17 +27,16 @@ class DefaultRobot : public SimpleRobot
 	Joystick *rightStick;			// joystick 1 (arcade stick or right tank stick)
 	Joystick *leftStick;			// joystick 2 (tank left stick)
 	DriverStation *ds;				// driver station object
+	Victor *myrightvictor;
+	Victor *myleftvictor;
 	Victor *mytopspinner;
 	Victor *myconveyerbelt;
-	Solenoid *myhatch;
 	Relay *mybottomspinner;
-	Relay *mycompressor;
 	DigitalInput *mycheckball;
 	Timer *mytimer;
 	Accelerometer *myAccelerometer;
-	AnalogChannel *myPot;
-	DigitalInput *myPotRefresh;
-
+	static const int leftsign = 1;
+	static const int rightsign = 1;
 	enum							// Driver Station jumpers to control program operation
 	{ ARCADE_MODE = 1,				// Tank/Arcade jumper is on DS Input 1 (Jumper present is arcade)
 	  ENABLE_AUTONOMOUS = 2,		// Autonomous/Teleop jumper is on DS Input 2 (Jumper present is autonomous)
@@ -74,20 +68,25 @@ public:
 	 * ports 1 and 2 on the first digital module.
 	 */
 	DefaultRobot(void)
-	{
+	{ 
+		
 		ds = DriverStation::GetInstance();
 		myRobot = new RobotDrive(rightdrive, leftdrive);
 		rightStick = new Joystick(1);			// create the joysticks
 		leftStick = new Joystick(2);
 	// these channel are all controlled by enum but may need slot val
-		mycheckball = new DigitalInput(12);
-		myleftvictor = new Victor(leftdrive);
+		mycheckball = new DigitalInput(7); //fake
+		printf("top of my error");
+		//myrightvictor = new Victor(rightdrive); //conflict
+ 		//no error
+		mytopspinner  = new Victor(topspinner);
+		printf("in the middle!");
+		//myleftvictor = new Victor(leftdrive); //conflict
+		printf("im at the end of the errors");
 		myconveyerbelt  = new Victor(conveyerbelt);
 		mybottomspinner = new Relay(1); 
 		mytimer = new Timer();
-		myAccelerometer = new Accelerometer(11); //need real val
-		myPot = new AnalogChannel(9);
-		myPotRefresh = new DigitalInput(10);
+		myAccelerometer = new Accelerometer(1); //need real val
 		//Update the motors at least every 100ms.
 		GetWatchdog().SetExpiration(100);
 		
@@ -101,12 +100,17 @@ public:
 	void Autonomous(void)
 	{
 		GetWatchdog().SetEnabled(false);
-		if (ds->GetDigitalIn(ENABLE_AUTONOMOUS) == 1)	// only run the autonomous program if jumper is in place
-		{
 			myRobot->Drive(0.5, 0.0);			// drive forwards half speed
-			Wait(2000);							//    for 2 seconds
+			Wait(.5);							//    for 2 seconds
+			//while
+			myRobot->Drive( 1.0, 0.5);
+			Wait (.5) ;
+	        myRobot->Drive (.5, 0.-5);
+	        Wait (.5);
 			myRobot->Drive(0.0, 0.0 );			// stop robot
-		}
+			//break if camera in ==true
+			printf("AUTO MODE");
+		
 		GetWatchdog().SetEnabled(true);
 	}
 
@@ -121,13 +125,13 @@ public:
 		 * 1 = up -1 =down 0 = neutral*/
 		while (IsOperatorControl())
 		{
+			printf("TELE MODE");
 			GetWatchdog().Feed();
 
 			// determine if tank or arcade mode; default with no jumper is for tank drive
-			if (ds->GetDigitalIn(ARCADE_MODE) == 0) 
-			{	
-				myRobot->TankDrive(leftStick->GetY() * slipcheck(), rightStick->GetY() * slipcheck());	 // drive with tank style
-			} 
+				
+				myRobot->TankDrive(leftStick->GetY() * slipcheck() * leftsign, rightStick->GetY() * slipcheck()* rightsign);	 // drive with tank style
+			 
 			/* we are using Tankdrive
 			 * else 
 			{
@@ -168,15 +172,15 @@ public:
 					mytimer->Stop();
 					mytimer->Reset();
 				}
-			if (myPotRefresh->Get() == true)
-			{ // not final way to set pot
-				defaultbeltspeed = myPot->GetVoltage() /5;
-			}
 		}
 	}
 };
 
 START_ROBOT_CLASS(DefaultRobot);
 
+//placeholding code
+float slipcheck(){
+	return 1.0;
+}
 
 
