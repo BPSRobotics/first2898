@@ -1,6 +1,7 @@
 DefaultRobot/Debug/Objects/2898_Lunacy_2009/DefaultRobot.o:  \
  D:/WindRiver/workspace/2898_Lunacy_2009/DefaultRobot.cpp \
   D:/WindRiver/workspace/2898_Lunacy_2009/DefaultRobot.h \
+  D:/WindRiver/workspace/2898_Lunacy_2009/Vision.h \
   d:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/iostream.h \
   d:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/istream \
   d:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/ostream \
@@ -228,6 +229,8 @@ DefaultRobot/Debug/Objects/2898_Lunacy_2009/DefaultRobot.o:  \
   D:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h
 
 D:/WindRiver/workspace/2898_Lunacy_2009/DefaultRobot.h:
+
+D:/WindRiver/workspace/2898_Lunacy_2009/Vision.h:
 
 d:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/iostream.h:
 

@@ -26,6 +26,7 @@ Rev 6: more tele mode
 Rev 7: working on the tele mode
 Rev 8: Intergrated the camera
 Rev 9: Adjusted the layout of the code to improve readability
+Rev 10: Seperated the Vision stuff from the rest of the code to futher increase readability and the other of the -abilities of programming
 
 SVN Information:
 2009 Begun: Revision 4

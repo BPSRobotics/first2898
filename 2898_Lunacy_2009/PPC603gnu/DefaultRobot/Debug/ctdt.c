@@ -7,9 +7,11 @@
 /*       -fdollars-in-identifiers flag.                   */
 
 
-void _GLOBAL__I__Z8tooCloseP29ParticleAnalysisReport_struct();
+void _GLOBAL__I__ZN12DefaultRobotC2Ev();
 
 void _GLOBAL__I_Target_debugFlag();
+
+void _GLOBAL__I__ZN6VisionC2EP5ServoS1_fi();
 
 void _GLOBAL__I_g_stopImageToPCServer();
 
@@ -40,8 +42,9 @@ void _GLOBAL__I__Z14SetJaguarSpeedjjf();
 extern void (*_ctors[])();
 void (*_ctors[])() =
     {
-    _GLOBAL__I__Z8tooCloseP29ParticleAnalysisReport_struct,
+    _GLOBAL__I__ZN12DefaultRobotC2Ev,
     _GLOBAL__I_Target_debugFlag,
+    _GLOBAL__I__ZN6VisionC2EP5ServoS1_fi,
     _GLOBAL__I_g_stopImageToPCServer,
     _GLOBAL__I__ZN12AnalogModule11GetInstanceEj,
     _GLOBAL__I__ZN9ErrorBase16globalErrorMutexE,
@@ -58,9 +61,11 @@ void (*_ctors[])() =
     0
     };
 
-void _GLOBAL__D__Z8tooCloseP29ParticleAnalysisReport_struct();
+void _GLOBAL__D__ZN12DefaultRobotC2Ev();
 
 void _GLOBAL__D_Target_debugFlag();
+
+void _GLOBAL__D__ZN6VisionC2EP5ServoS1_fi();
 
 void _GLOBAL__D_g_stopImageToPCServer();
 
@@ -83,8 +88,9 @@ void _GLOBAL__D__Z14SetJaguarSpeedjjf();
 extern void (*_dtors[])();
 void (*_dtors[])() =
     {
-    _GLOBAL__D__Z8tooCloseP29ParticleAnalysisReport_struct,
+    _GLOBAL__D__ZN12DefaultRobotC2Ev,
     _GLOBAL__D_Target_debugFlag,
+    _GLOBAL__D__ZN6VisionC2EP5ServoS1_fi,
     _GLOBAL__D_g_stopImageToPCServer,
     _GLOBAL__D__ZN9ErrorBase16globalErrorMutexE,
     _GLOBAL__D__ZN10Ultrasonic6m_taskE,
