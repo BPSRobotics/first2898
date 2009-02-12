@@ -11,16 +11,21 @@ works.
 
 
 Programmers Todo (in order of priority):
-* Update the laptops with SVN and windriver
-* Decide what the smaller sub systems will be
-* Simple Drive
-* Auto Gathering
-* Simple Scoring
 * Auto-Mode
 * Assisted Traction Control
 * Assisted Camera Drive
 * Assisted Scoring
 * Make it do everything perfectly
+* Work on makeing the code cleaner and easier to read
+
+Change Log:
+Prior to 4: Adjusting the workspaces
+Rev 4: ?
+Rev 5: ?
+Rev 6: more tele mode
+Rev 7: working on the tele mode
+Rev 8: Intergrated the camera
+Rev 9: Adjusted the layout of the code to improve readability
 
 SVN Information:
 2009 Begun: Revision 4
