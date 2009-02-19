@@ -50,6 +50,10 @@
 DefaultRobot::DefaultRobot(void)
 { 
 	
+	currentrightmotoroutput = 0; //one time declaration for slipcheck function
+	currentleftmotoroutput = 0;
+	beltstatus = 0;  //mypickupballcheck function
+	
 	//set up there stuff
 	ds = DriverStation::GetInstance();
 	myRobot = new RobotDrive(rightdrive, leftdrive);
@@ -58,12 +62,13 @@ DefaultRobot::DefaultRobot(void)
 	
 	//set up our stuff
 	// these channel are all controlled by enum but may need slot val
-	mycheckball = new DigitalInput(7); //fake
-	mytopspinner  = new Victor(topspinner);
-	myconveyerbelt  = new Victor(conveyerbelt);
-	mybottomspinner = new Relay(1); 
-	mytimer = new Timer();
-	myAccelerometer = new Accelerometer(1); //need real val
+	myopticalballchecker = new DigitalInput(1); //optical sensor to detect balls
+	mytopspinner  = new Victor(topspinner); //victor controlling the top ball shooter
+	myconveyorbelt  = new Victor(conveyorbelt); //victor controlling the conveyorbelt
+	mybottomspinner = new Relay(1); //relay controlling the bottom ball collector
+	mytimer = new Timer(); //timer controlling the pickup of balls
+	myautotimer =new Timer();
+	myAccelerometer = new Accelerometer(1); //we dont have one
 	
 	//todo: this
 	//*encoderRight = new Encoder();
@@ -77,7 +82,7 @@ DefaultRobot::DefaultRobot(void)
 	
 	/* image data for tracking - override default parameters if needed */
 	/* recommend making PINK the first color because GREEN is more 
-	 * subsceptible to hue variations due to lighting type so may
+	 * subsceptible to  hue variations due to lighting type so may
 	 * result in false positives */
 	// PINK
 	sprintf (td1.name, "PINK");
@@ -112,32 +117,35 @@ void DefaultRobot::Autonomous(void)
 {
 	//todo: make sure this works?
 	
-	DPRINTF(LOG_DEBUG, "Autonomous");				
-			
+	DPRINTF(LOG_DEBUG, "Autonomous");
+	myautotimer->Reset();
+	myautotimer->Start();		
 	while( IsAutonomous() )	
 	{
 		//this is where auto mode works
 		GetWatchdog().SetEnabled(false);
+		if (myautotimer->Get() < 4)
+		{
+			myRobot->Drive(0.5,0.0);
+			pickupball();
+			pickupballtimercheck(1.2);
+		}
+		else
+		{
+			mybottomspinner->Set(Relay::kReverse );  
+			myautotimer->Stop();
+			myRobot->Drive(0.1,0.5);
+			pickupball();
+			pickupballtimercheck(1.2);
+		}
 		
-		//todo figure out what auto is suppose to do other than tracking
-		
-		myRobot->Drive(0.5, 0.0);			// drive forwards half speed
-		Wait(500);	//btw these are in miliseconds -SG
-		
-		myRobot->Drive( 1.0, 0.5);
-		Wait(500);
-		
-        myRobot->Drive (.5, -0.5);
-        Wait(500);
-        
-		myRobot->Drive(0.0, 0.0);			// stop robot	
-		
+
+/*
 		//cam stuff here?
 		myRobot->Drive(0.25, 1.0); //look for targets by turning
 		//cam tracking!
 		if (camera->DoTracking()) //note camera does try to regulate the execution so currently there is no start stop methods to solve this problem
 		{ //or putting logic to check weather or not to care about if it sees a target.
-			
 			myRobot->Drive(0.25, 0.0); //I see target move towards it
 		}
 		else
@@ -146,29 +154,28 @@ void DefaultRobot::Autonomous(void)
 		}
 		
 		GetWatchdog().SetEnabled(true); //reenable the watch dog
-	}  // end while
+	*/
+		}  // end while
 
 	DPRINTF(LOG_DEBUG, "end Autonomous");
 	ShowActivity ("Autonomous end                                            ");
 }
-
 /**
  * Runs the motors under driver control with either tank or arcade steering selected
  * by a jumper in DS Digin 0. Also an arm will operate based on a joystick Y-axis. 
  */
 void DefaultRobot::OperatorControl(void)
 {
-	int beltstatus = 0; 
-	/*The beltstatus variable is to keep track of how the belt is set to be driven
-	 * 1 = up -1 =down 0 = neutral*/
+	int counter = 0;
 	while (IsOperatorControl())
 	{
-		printf("TELE MODE");
+		counter += 1;
+		//printf("TELE MODE");
 		GetWatchdog().Feed();
 
 		// determine if tank or arcade mode; default with no jumper is for tank drive
 			
-		myRobot->TankDrive(leftStick->GetY() * slipcheck() * leftsign, rightStick->GetY() * slipcheck() * rightsign);	 // drive with tank style
+		myRobot->TankDrive(slipcheck(currentleftmotoroutput,leftStick->GetY()) * leftsign, slipcheck(currentrightmotoroutput,rightStick->GetY()) * rightsign);	 // drive with tank style
 		 
 		/* we are using Tankdrive
 		 * else 
@@ -176,39 +183,89 @@ void DefaultRobot::OperatorControl(void)
 			myRobot->ArcadeDrive(rightStick);	         // drive with arcade style (use right stick)
 		}*/
 		// beginning of the 2898 secondary system code
-		
-		mybottomspinner->Set(Relay::kForward); //go forward 
-		if (ds->GetDigitalIn(upswitch) == true)
+		// turn on the relay controlling the bottom spinner
+		mybottomspinner->Set(Relay::kReverse );  
+		//print out the value of our optical sensor to check for balls
+		//printf("Optical is: %d\n", myopticalballchecker->Get());
+		// if button 3 pressed pressed, move belt down?
+		printf("Button test is 1: %d\n", ds->GetDigitalIn(1));
+		//printf(" Button test is 2: %d\n", ds->GetDigitalIn(2));
+		//printf(" Button test is 3: %d\n", ds->GetDigitalIn(3));
+		//printf("%d", counter);
+		if (rightStick->GetRawButton(3) == true)
 		{
-			myconveyerbelt->Set(DEFAULTBELTSPEED);  // move belt up
-			beltstatus = 1;
+			myconveyorbelt->Set(DEFAULTBELTSPEED);
+			beltstatus =1;
 		}
-		// the stopping of the main belt is controlled by next if check
-		if (ds->GetDigitalIn(downswitch) == true && ds->GetDigitalIn(upswitch)==false)
-		{ //if down is push and up is not pushed, proceed
-			myconveyerbelt->Set(-1 * DEFAULTBELTSPEED); //set belt down
+		// else if button 2 pressed move belt up?
+		else if(rightStick->GetRawButton(2)== true)
+		{
+			myconveyorbelt->Set(-1 * DEFAULTBELTSPEED);
 			beltstatus = -1;
 		}
-		else
+		//if trigger pushed move belt up and start top spinner
+		if (rightStick->GetTrigger() == true)
 		{
-			myconveyerbelt->Set(0); //stop belt
-			beltstatus = 0;
+			mytopspinner->Set(-1.0);
+			myconveyorbelt->Set(DEFAULTBELTSPEED);
+			beltstatus =1;
 		}
+		// if trigger false, stop top spinner
+		else if (rightStick->GetTrigger() == false)
+		{
+			mytopspinner->Set(0.0);
+		}	
+		// if light sensor sees ball then move belt up and start time
+		pickupball();
 		
-		if (mycheckball->Get() == true) 
-			//unsure if "get" works
-			{
-				myconveyerbelt->Set(DEFAULTBELTSPEED);     //life ball up one slot
-				mytimer->Start();
-				
-			}
-		
-		if (mytimer->Get() == 2)
-			{
-				myconveyerbelt->Set(beltstatus * DEFAULTBELTSPEED); //set the conveyer belt back to its intended state
-				mytimer->Stop();
-				mytimer->Reset();
-			}
+		/* check if timer has reached x seconds and if so stop and reset
+		 * timer and restore belt to it's default status */
+		pickupballtimercheck(15.0);
+		}
+	} //end robot object declaration
+
+/*The slipcheck function is designed to increment the output to our motors
+ * it needs to be calibrated, eventually the robot will isolate between
+ * the motoroutput requested, and a motoroutput one arbitrary increment below*/
+
+float DefaultRobot::slipcheck(float &currentmotoroutput, float joystickyvalue )
+{	
+	if (currentmotoroutput < joystickyvalue)
+	{
+		currentmotoroutput+= SLIPCONSTANT;
+	}
+	else
+	{
+		currentmotoroutput-= SLIPCONSTANT;
+	}
+	return currentmotoroutput;
+	
+}
+void DefaultRobot::pickupball()
+{
+if (myopticalballchecker->Get() == false)
+				//unsure if "get" works for digital sensor but docs are vague
+	{
+		myconveyorbelt->Set(DEFAULTBELTSPEED);     //life ball up one slot
+		mytimer->Start();
+	}
+else 
+	{
+if (rightStick->GetRawButton(3) == false && rightStick->GetRawButton(2)== false && rightStick->GetTrigger()== false)
+	{
+		myconveyorbelt->Set(0);
+	}
+	}
+}
+void DefaultRobot::pickupballtimercheck(float time)
+{
+	if (mytimer->Get() >= time) //i have decreased this value by .1 -bg
+	{
+		/*The beltstatus variable is to keep track of how the belt is set to be driven
+		* 1 = up -1 =down 0 = neutral*/
+		myconveyorbelt->Set(beltstatus * DEFAULTBELTSPEED); //set the conveyer belt back to its intended state
+		mytimer->Stop();
+		mytimer->Reset();
 	}
 }
 

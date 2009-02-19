@@ -20,6 +20,11 @@
  *               								 
  *****************************************************************/
 
+
+//constants
+#define DEFAULTBELTSPEED 				-1.0  //I Changed this to a constant because using global variables is ussally frowned apon
+#define SLIPCONSTANT 0.0005
+
 /****************************************************************\
  * Includes
 \****************************************************************/
@@ -28,6 +33,9 @@
 
 class DefaultRobot : public SimpleRobot
 {
+	float currentrightmotoroutput; //one time declaration for slipcheck function
+	float currentleftmotoroutput; // one time declaration for slipcheck function
+	int beltstatus;
 	//there stuff
 	RobotDrive *myRobot;			// robot drive system
 	Joystick *rightStick;			// joystick 1 (arcade stick or right tank stick)
@@ -38,11 +46,12 @@ class DefaultRobot : public SimpleRobot
 	Victor *myrightvictor;
 	Victor *myleftvictor;
 	Victor *mytopspinner;
-	Victor *myconveyerbelt;
+	Victor *myconveyorbelt;
 	
 	Relay *mybottomspinner;
-	DigitalInput *mycheckball;
+	DigitalInput *myopticalballchecker;
 	Timer *mytimer;
+	Timer *myautotimer;
 	Accelerometer *myAccelerometer;
 	
 	Encoder *encoderRight; //added by Steven
@@ -63,10 +72,10 @@ class DefaultRobot : public SimpleRobot
 	} jumpers;	                          
 	enum
 	{                                //all fake values
-		rightdrive = 1,
-		leftdrive = 2,
-		conveyerbelt = 3,
-		topspinner = 4,
+		rightdrive = 4,
+		leftdrive = 3,
+		conveyorbelt = 2,
+		topspinner = 1,
 
 		
 	}pwms;
@@ -84,6 +93,9 @@ class DefaultRobot : public SimpleRobot
 	DefaultRobot(void);
 	
 	//Game Modes!
+	float slipcheck(float &currentmotoroutput, float joystickyvalue);
+	void pickupball();
+	void pickupballtimercheck(float time);
 	void Autonomous(void);
 	void OperatorControl(void);
 };
@@ -91,4 +103,3 @@ class DefaultRobot : public SimpleRobot
 /****************************************************************\
  * Prototypes
 \****************************************************************/
-float slipcheck();

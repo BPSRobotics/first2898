@@ -48,8 +48,6 @@ static int TwoColorDemo_debugFlag = 0;
 // for 160x120, 50 pixels = 0.38%
 #define MIN_PARTICLE_TO_IMAGE_PERCENT 	0.25 // target is too small
 #define MAX_PARTICLE_TO_IMAGE_PERCENT 	20.0 // target is too close
-#define DEFAULTBELTSPEED 				0.5  //I Changed this to a constant because using global variables is ussally frowned apon
-
 
 /****************************************************************\
  * Macros
