@@ -232,31 +232,37 @@ float DefaultRobot::slipcheck(float &currentmotoroutput, float joystickyvalue )
 {	
 	if (currentmotoroutput < joystickyvalue)
 	{
-		currentmotoroutput+= SLIPCONSTANT;
+		currentmotoroutput += SLIPCONSTANT;
+	}
+	else if (currentmotoroutput > joystickvalue)
+	{
+		currentmotoroutput -= SLIPCONSTANT;
 	}
 	else
 	{
-		currentmotoroutput-= SLIPCONSTANT;
+		// do nothing
 	}
 	return currentmotoroutput;
 	
 }
+
 void DefaultRobot::pickupball()
 {
-if (myopticalballchecker->Get() == false)
-				//unsure if "get" works for digital sensor but docs are vague
+	if (myopticalballchecker->Get() == false)
+	//unsure if "get" works for digital sensor but docs are vague
 	{
 		myconveyorbelt->Set(DEFAULTBELTSPEED);     //life ball up one slot
 		mytimer->Start();
 	}
-else 
+	else 
 	{
-if (rightStick->GetRawButton(3) == false && rightStick->GetRawButton(2)== false && rightStick->GetTrigger()== false)
-	{
-		myconveyorbelt->Set(0);
-	}
+		if (rightStick->GetRawButton(3) == false && rightStick->GetRawButton(2)== false && rightStick->GetTrigger()== false)
+		{
+			myconveyorbelt->Set(0);
+		}
 	}
 }
+
 void DefaultRobot::pickupballtimercheck(float time)
 {
 	if (mytimer->Get() >= time) //i have decreased this value by .1 -bg

@@ -31,8 +31,8 @@ else
 MODE_DIR := NonDebug
 endif
 OBJ_DIR := .
-PRJ_ROOT_DIR := D:/WindRiver/workspace/2898_Lunacy_2009
-WS_ROOT_DIR := D:/WindRiver/workspace
+PRJ_ROOT_DIR := C:/WindRiver/workspace/2898_Lunacy_2009
+WS_ROOT_DIR := C:/WindRiver/workspace
 
 
 
@@ -113,15 +113,15 @@ DefaultRobot/$(MODE_DIR)/% : LIBPATH =
 DefaultRobot/$(MODE_DIR)/% : LIBS = 
 DefaultRobot/$(MODE_DIR)/% : OBJ_DIR := DefaultRobot/$(MODE_DIR)
 
-DefaultRobot/$(MODE_DIR)/Objects/2898_Lunacy_2009/DefaultRobot.o : D:/WindRiver/workspace/2898_Lunacy_2009/DefaultRobot.cpp
+DefaultRobot/$(MODE_DIR)/Objects/2898_Lunacy_2009/DefaultRobot.o : C:/WindRiver/workspace/2898_Lunacy_2009/DefaultRobot.cpp
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-DefaultRobot/$(MODE_DIR)/Objects/2898_Lunacy_2009/Target.o : D:/WindRiver/workspace/2898_Lunacy_2009/Target.cpp
+DefaultRobot/$(MODE_DIR)/Objects/2898_Lunacy_2009/Target.o : C:/WindRiver/workspace/2898_Lunacy_2009/Target.cpp
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-DefaultRobot/$(MODE_DIR)/Objects/2898_Lunacy_2009/Vision.o : D:/WindRiver/workspace/2898_Lunacy_2009/Vision.cpp
+DefaultRobot/$(MODE_DIR)/Objects/2898_Lunacy_2009/Vision.o : C:/WindRiver/workspace/2898_Lunacy_2009/Vision.cpp
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
