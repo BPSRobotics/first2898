@@ -17,6 +17,7 @@
  *                                 ^"===""   
  *
  * Programming Notes:
+ * Brian :  fixed probable typo on line 238.
  *
  * Steven: Might be a good idea to get use to proper indenting, 
  * like keeping alignment with the scope of the program makes checking for 
@@ -234,7 +235,7 @@ float DefaultRobot::slipcheck(float &currentmotoroutput, float joystickyvalue )
 	{
 		currentmotoroutput += SLIPCONSTANT;
 	}
-	else if (currentmotoroutput > joystickvalue)
+	else if (currentmotoroutput > joystickyvalue) // I have changed this line
 	{
 		currentmotoroutput -= SLIPCONSTANT;
 	}
