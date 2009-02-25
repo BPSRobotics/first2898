@@ -127,7 +127,7 @@ void DefaultRobot::Autonomous(void)
 		GetWatchdog().SetEnabled(false);
 		if (myautotimer->Get() < 4)
 		{
-			myRobot->Drive(0.5,0.0);
+			//myRobot->Drive(0.5,0.0);
 			pickupball();
 			pickupballtimercheck(1.2);
 		}
@@ -141,7 +141,6 @@ void DefaultRobot::Autonomous(void)
 		}
 		
 
-/*
 		//cam stuff here?
 		myRobot->Drive(0.25, 1.0); //look for targets by turning
 		//cam tracking!
@@ -155,7 +154,6 @@ void DefaultRobot::Autonomous(void)
 		}
 		
 		GetWatchdog().SetEnabled(true); //reenable the watch dog
-	*/
 		}  // end while
 
 	DPRINTF(LOG_DEBUG, "end Autonomous");
@@ -187,12 +185,7 @@ void DefaultRobot::OperatorControl(void)
 		// turn on the relay controlling the bottom spinner
 		mybottomspinner->Set(Relay::kReverse );  
 		//print out the value of our optical sensor to check for balls
-		//printf("Optical is: %d\n", myopticalballchecker->Get());
 		// if button 3 pressed pressed, move belt down?
-		printf("Button test is 1: %d\n", ds->GetDigitalIn(1));
-		//printf(" Button test is 2: %d\n", ds->GetDigitalIn(2));
-		//printf(" Button test is 3: %d\n", ds->GetDigitalIn(3));
-		//printf("%d", counter);
 		if (rightStick->GetRawButton(3) == true)
 		{
 			myconveyorbelt->Set(DEFAULTBELTSPEED);

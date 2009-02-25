@@ -23,7 +23,7 @@
 
 //constants
 #define DEFAULTBELTSPEED 				-1.0  //I Changed this to a constant because using global variables is ussally frowned apon
-#define SLIPCONSTANT 0.0005
+#define SLIPCONSTANT .0004
 
 /****************************************************************\
  * Includes
