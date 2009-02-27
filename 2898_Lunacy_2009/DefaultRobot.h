@@ -22,14 +22,15 @@
 
 
 //constants
-#define DEFAULTBELTSPEED 				-1.0  //I Changed this to a constant because using global variables is ussally frowned apon
-#define SLIPCONSTANT .0004
+#define DEFAULTBELTSPEED 				-1.0  //I Changed this to a constant because using global variables is usally frowned apon
+#define SLIPCONSTANT .0004                    //looks like you set this back to original state steven? -brian
 
 /****************************************************************\
  * Includes
 \****************************************************************/
 #include "Vision.h"
 #include "WPILib.h"
+#include <math.h>
 
 class DefaultRobot : public SimpleRobot
 {
@@ -91,11 +92,11 @@ class DefaultRobot : public SimpleRobot
 	public:
 	//Constructors
 	DefaultRobot(void);
-	
-	//Game Modes!
+	//member functions
 	float slipcheck(float &currentmotoroutput, float joystickyvalue);
 	void pickupball();
 	void pickupballtimercheck(float time);
+	//Game Modes!
 	void Autonomous(void);
 	void OperatorControl(void);
 };

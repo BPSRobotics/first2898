@@ -117,6 +117,7 @@ DefaultRobot::DefaultRobot(void)
 void DefaultRobot::Autonomous(void)
 {
 	//todo: make sure this works?
+	//This code is 100% broken, it is a combination of brian's failsafe autonomous and stevens camera code
 	
 	DPRINTF(LOG_DEBUG, "Autonomous");
 	myautotimer->Reset();
@@ -174,8 +175,9 @@ void DefaultRobot::OperatorControl(void)
 
 		// determine if tank or arcade mode; default with no jumper is for tank drive
 			
-		myRobot->TankDrive(slipcheck(currentleftmotoroutput,leftStick->GetY()) * leftsign, slipcheck(currentrightmotoroutput,rightStick->GetY()) * rightsign);	 // drive with tank style
-		 
+		// old slipcheck code: myRobot->TankDrive(slipcheck(currentleftmotoroutput,leftStick->GetY()) * leftsign, slipcheck(currentrightmotoroutput,rightStick->GetY()) * rightsign);	 // drive with tank style
+		//this is a new "mad science" function that is slip constant with cubic progression... stevens code
+		myRobot->TankDrive(pow(slipcheck(currentleftmotoroutput, leftStick->GetY()), 3) * leftsign, pow(slipcheck(currentrightmotoroutput, rightStick->GetY()), 3) * rightsign); 
 		/* we are using Tankdrive
 		 * else 
 		{
