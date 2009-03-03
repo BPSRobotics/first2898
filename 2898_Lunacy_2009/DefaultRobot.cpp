@@ -35,6 +35,8 @@
  * Includes
 \****************************************************************/
 #include "DefaultRobot.h" //everything is in there
+#include "Encoder.h"
+#include "math.h"
 
 /****************************************************************\
  * Functions
@@ -70,6 +72,11 @@ DefaultRobot::DefaultRobot(void)
 	mytimer = new Timer(); //timer controlling the pickup of balls
 	myautotimer =new Timer();
 	myAccelerometer = new Accelerometer(1); //we dont have one
+	myAccelerometer->SetSensitivity(.3); //sensitivity is 300mV/g
+	myAccelerometer->SetZero(1.5) ;//0g is 1.5 volts
+	//this sets up the encoder with the a channel on 2, and the b channel on 3
+	encoder = new Encoder(2,3);
+	encoder->Start();
 	
 	//todo: this
 	//*encoderRight = new Encoder();
@@ -117,7 +124,7 @@ DefaultRobot::DefaultRobot(void)
 void DefaultRobot::Autonomous(void)
 {
 	//todo: make sure this works?
-	//This code is 100% broken, it is a combination of brian's failsafe autonomous and stevens camera code
+
 	
 	DPRINTF(LOG_DEBUG, "Autonomous");
 	myautotimer->Reset();
@@ -142,19 +149,19 @@ void DefaultRobot::Autonomous(void)
 		}
 		
 
-		//cam stuff here?
-		myRobot->Drive(0.25, 1.0); //look for targets by turning
-		//cam tracking!
-		if (camera->DoTracking()) //note camera does try to regulate the execution so currently there is no start stop methods to solve this problem
-		{ //or putting logic to check weather or not to care about if it sees a target.
-			myRobot->Drive(0.25, 0.0); //I see target move towards it
-		}
-		else
-		{
-			myRobot->Drive(0.25, 1.0); //I don't start to turn again
-		}
-		
-		GetWatchdog().SetEnabled(true); //reenable the watch dog
+//		//cam stuff here?
+//		myRobot->Drive(0.25, 1.0); //look for targets by turning
+//		//cam tracking!
+//		if (camera->DoTracking()) //note camera does try to regulate the execution so currently there is no start stop methods to solve this problem
+//		{ //or putting logic to check weather or not to care about if it sees a target.
+//			myRobot->Drive(0.25, 0.0); //I see target move towards it
+//		}
+//		else
+//		{
+//			myRobot->Drive(0.25, 1.0); //I don't start to turn again
+//		}
+//		
+//		GetWatchdog().SetEnabled(true); //reenable the watch dog
 		}  // end while
 
 	DPRINTF(LOG_DEBUG, "end Autonomous");
@@ -175,9 +182,14 @@ void DefaultRobot::OperatorControl(void)
 
 		// determine if tank or arcade mode; default with no jumper is for tank drive
 			
-		// old slipcheck code: myRobot->TankDrive(slipcheck(currentleftmotoroutput,leftStick->GetY()) * leftsign, slipcheck(currentrightmotoroutput,rightStick->GetY()) * rightsign);	 // drive with tank style
-		//this is a new "mad science" function that is slip constant with cubic progression... stevens code
-		myRobot->TankDrive(pow(slipcheck(currentleftmotoroutput, leftStick->GetY()), 3) * leftsign, pow(slipcheck(currentrightmotoroutput, rightStick->GetY()), 3) * rightsign); 
+		//myRobot->TankDrive(slipcheck(currentleftmotoroutput,leftStick->GetY()) * leftsign, slipcheck(currentrightmotoroutput,rightStick->GetY()) * rightsign);	 // drive with tank style
+		if (leftStick->GetTrigger() == false && rightStick->GetTrigger() == false)
+		{
+			myRobot->TankDrive(pow(slipcheck(currentleftmotoroutput,leftStick->GetY()),3) * leftsign, pow(slipcheck(currentrightmotoroutput,rightStick->GetY()),3) * rightsign); 
+		}
+		else
+			myRobot->TankDrive(leftStick,rightStick);
+		
 		/* we are using Tankdrive
 		 * else 
 		{
@@ -188,26 +200,26 @@ void DefaultRobot::OperatorControl(void)
 		mybottomspinner->Set(Relay::kReverse );  
 		//print out the value of our optical sensor to check for balls
 		// if button 3 pressed pressed, move belt down?
-		if (rightStick->GetRawButton(3) == true)
+		if (ds->GetDigitalIn(1) == false)
 		{
 			myconveyorbelt->Set(DEFAULTBELTSPEED);
 			beltstatus =1;
 		}
 		// else if button 2 pressed move belt up?
-		else if(rightStick->GetRawButton(2)== true)
+		else if(ds->GetDigitalIn(2)== false)
 		{
 			myconveyorbelt->Set(-1 * DEFAULTBELTSPEED);
 			beltstatus = -1;
 		}
 		//if trigger pushed move belt up and start top spinner
-		if (rightStick->GetTrigger() == true)
+		if (ds->GetDigitalIn(3) == false)
 		{
 			mytopspinner->Set(-1.0);
 			myconveyorbelt->Set(DEFAULTBELTSPEED);
 			beltstatus =1;
 		}
 		// if trigger false, stop top spinner
-		else if (rightStick->GetTrigger() == false)
+		else if (ds->GetDigitalIn(3) == true)
 		{
 			mytopspinner->Set(0.0);
 		}	
@@ -216,7 +228,7 @@ void DefaultRobot::OperatorControl(void)
 		
 		/* check if timer has reached x seconds and if so stop and reset
 		 * timer and restore belt to it's default status */
-		pickupballtimercheck(15.0);
+		pickupballtimercheck(1.0); // i changed this to 1.0 from 15.0 -bg seemed way too long
 		}
 	} //end robot object declaration
 
@@ -226,6 +238,8 @@ void DefaultRobot::OperatorControl(void)
 
 float DefaultRobot::slipcheck(float &currentmotoroutput, float joystickyvalue )
 {	
+	printf("Encoder %F\r", encoder->GetPeriod());
+	//printf "button test %d",ds->GetDigitalIn(1);
 	if (currentmotoroutput < joystickyvalue)
 	{
 		currentmotoroutput += SLIPCONSTANT;
@@ -234,10 +248,7 @@ float DefaultRobot::slipcheck(float &currentmotoroutput, float joystickyvalue )
 	{
 		currentmotoroutput -= SLIPCONSTANT;
 	}
-	else
-	{
-		// do nothing
-	}
+	
 	return currentmotoroutput;
 	
 }
@@ -252,7 +263,7 @@ void DefaultRobot::pickupball()
 	}
 	else 
 	{
-		if (rightStick->GetRawButton(3) == false && rightStick->GetRawButton(2)== false && rightStick->GetTrigger()== false)
+		if (ds->GetDigitalIn(1) == true && ds->GetDigitalIn(2)== true && ds->GetDigitalIn(3)== true)
 		{
 			myconveyorbelt->Set(0);
 		}
