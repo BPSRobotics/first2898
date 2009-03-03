@@ -24,6 +24,8 @@
  * Includes
 \****************************************************************/
 //	standard stuff
+#ifndef __VISION__H__
+#define __VISION__H__
 #include <iostream.h>
 #include "math.h"
 
@@ -82,3 +84,4 @@ class Vision
 		bool DoTracking(void);
 };
 
+#endif

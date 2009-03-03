@@ -22,22 +22,21 @@
 
 
 //constants
-#define DEFAULTBELTSPEED 				-1.0  //I Changed this to a constant because using global variables is usally frowned apon
-#define SLIPCONSTANT .0004                    //looks like you set this back to original state steven? -brian
+#define DEFAULTBELTSPEED 				-1.0  //I Changed this to a constant because using global variables is ussally frowned apon
+#define SLIPCONSTANT .00039
 
 /****************************************************************\
  * Includes
 \****************************************************************/
 #include "Vision.h"
 #include "WPILib.h"
-#include <math.h>
 
 class DefaultRobot : public SimpleRobot
 {
 	float currentrightmotoroutput; //one time declaration for slipcheck function
 	float currentleftmotoroutput; // one time declaration for slipcheck function
 	int beltstatus;
-	//there stuff
+	//their stuff
 	RobotDrive *myRobot;			// robot drive system
 	Joystick *rightStick;			// joystick 1 (arcade stick or right tank stick)
 	Joystick *leftStick;			// joystick 2 (tank left stick)
@@ -55,8 +54,8 @@ class DefaultRobot : public SimpleRobot
 	Timer *myautotimer;
 	Accelerometer *myAccelerometer;
 	
-	Encoder *encoderRight; //added by Steven
-	Encoder *encoderLeft;  // we will need it later
+	Encoder *encoder; //we only need one encoder, this is it's object
+	
 	
 	Servo *servoPan;
 	Servo *servoTilt;
@@ -92,11 +91,12 @@ class DefaultRobot : public SimpleRobot
 	public:
 	//Constructors
 	DefaultRobot(void);
-	//member functions
+	
+	//Game Modes!
+	static void encoderHandler(tNIRIO_u32 interruptAssertedMask, void *param);
 	float slipcheck(float &currentmotoroutput, float joystickyvalue);
 	void pickupball();
 	void pickupballtimercheck(float time);
-	//Game Modes!
 	void Autonomous(void);
 	void OperatorControl(void);
 };
