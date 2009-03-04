@@ -35,6 +35,7 @@ class DefaultRobot : public SimpleRobot
 {
 	float currentrightmotoroutput; //one time declaration for slipcheck function
 	float currentleftmotoroutput; // one time declaration for slipcheck function
+	float currentautomotoroutput;  //et cetera
 	int beltstatus;
 	//their stuff
 	RobotDrive *myRobot;			// robot drive system

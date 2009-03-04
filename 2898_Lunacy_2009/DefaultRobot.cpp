@@ -17,7 +17,9 @@
  *                                 ^"===""   
  *
  * Programming Notes:
- * Brian :  fixed probable typo on line 238.
+ * Brian :  I have included the slipcheck function (linear) for use in robot drive in auto mode
+ * I do not know if I will be able to test it on wendsday but this code should work and it is the
+ * best yet....  
  *
  * Steven: Might be a good idea to get use to proper indenting, 
  * like keeping alignment with the scope of the program makes checking for 
@@ -55,6 +57,7 @@ DefaultRobot::DefaultRobot(void)
 	
 	currentrightmotoroutput = 0; //one time declaration for slipcheck function
 	currentleftmotoroutput = 0;
+	currentautomotoroutput =0; // one time delcaration for slipcheck in auto mode
 	beltstatus = 0;  //mypickupballcheck function
 	
 	//set up there stuff
@@ -71,12 +74,12 @@ DefaultRobot::DefaultRobot(void)
 	mybottomspinner = new Relay(1); //relay controlling the bottom ball collector
 	mytimer = new Timer(); //timer controlling the pickup of balls
 	myautotimer =new Timer();
-	myAccelerometer = new Accelerometer(1); //we dont have one
-	myAccelerometer->SetSensitivity(.3); //sensitivity is 300mV/g
-	myAccelerometer->SetZero(1.5) ;//0g is 1.5 volts
+	//myAccelerometer = new Accelerometer(1); //we dont have one
+	//myAccelerometer->SetSensitivity(.3); //sensitivity is 300mV/g
+	//myAccelerometer->SetZero(1.5) ;//0g is 1.5 volts
 	//this sets up the encoder with the a channel on 2, and the b channel on 3
-	encoder = new Encoder(2,3);
-	encoder->Start();
+	//encoder = new Encoder(2,3);
+	//encoder->Start();
 	
 	//todo: this
 	//*encoderRight = new Encoder();
@@ -123,7 +126,8 @@ DefaultRobot::DefaultRobot(void)
  */
 void DefaultRobot::Autonomous(void)
 {
-	//todo: make sure this works?
+	//todo: test code
+	//also, the motor values (or at least the robot drive class) seemed reversed. Look into that
 
 	
 	DPRINTF(LOG_DEBUG, "Autonomous");
@@ -135,7 +139,7 @@ void DefaultRobot::Autonomous(void)
 		GetWatchdog().SetEnabled(false);
 		if (myautotimer->Get() < 4)
 		{
-			//myRobot->Drive(0.5,0.0);
+			//myRobot->Drive(slipcheck(currentautomotoroutput,-1.0); // reversed
 			pickupball();
 			pickupballtimercheck(1.2);
 		}
@@ -143,7 +147,7 @@ void DefaultRobot::Autonomous(void)
 		{
 			mybottomspinner->Set(Relay::kReverse );  
 			myautotimer->Stop();
-			myRobot->Drive(0.1,0.5);
+			myRobot->Drive(0.5,0.6); // turn on dime
 			pickupball();
 			pickupballtimercheck(1.2);
 		}
@@ -238,7 +242,6 @@ void DefaultRobot::OperatorControl(void)
 
 float DefaultRobot::slipcheck(float &currentmotoroutput, float joystickyvalue )
 {	
-	printf("Encoder %F\r", encoder->GetPeriod());
 	//printf "button test %d",ds->GetDigitalIn(1);
 	if (currentmotoroutput < joystickyvalue)
 	{
