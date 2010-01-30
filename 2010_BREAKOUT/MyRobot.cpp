@@ -87,7 +87,6 @@ public:
 		base->HolonomicDrive(0.5,0.0,0.0);
 		//Save world
 	}
-	}
 	/**
 	 * Main test program in operator control period.
 	 * Aquires images from the camera and determines if they match FRC targets.
