@@ -1,6 +1,7 @@
 #include "Relay.h"
 #include "WPILib.h"
 #include <iostream>
+#include "DashboardDataFormat.h"
 
 /**
  * This is a demo program showing the use of the RobotBase class.
@@ -15,6 +16,7 @@ class RobotDemo : public SimpleRobot
 	AnalogChannel gyro;
 	AnalogChannel usonic;
 	DriverStation *ds;
+	DriverStationEnhancedIO *eds;
 	Relay spike;
 	DigitalInput KickerLimit;
 	DigitalInput KickerBackLimit;
@@ -33,6 +35,7 @@ public:
 		wench(3)
 	{
 		ds = DriverStation::GetInstance();
+		eds = &(ds->GetEnhancedIO());
 		GetWatchdog().SetExpiration(0.1);
 	}
 
@@ -54,14 +57,48 @@ public:
 	{
 		//AxisCamera &camera = AxisCamera::GetInstance();
 		GetWatchdog().SetEnabled(true);
+		
+		/*eds->SetDigitalOutput(9,true);
+		 * eds->SetLED(down, false);
+	 
+		int b = 3;
+		for(int i= 0; i<20; i++){
+		for (int i=8; i>3; i--)
+		{
+			eds->SetLED(i, true);
+			eds->SetLED(b, true);
+			b++;
+			Wait(.2);
+		}
+		b=4;
+		for (int i=5; i<9; i++)
+		{
+			eds->SetLED(i, false);
+			eds->SetLED(b, false);
+			b--;
+			Wait(.2);
+		}
+		}
+		*/
 		while (IsOperatorControl())
 		{
+		
 			GetWatchdog().Feed();
-			myRobot.HolonomicDrive(stick.GetMagnitude(),stick.GetTwist(),0.0);
+			sendIOPortData();
+			float rotation;
+			if(stick.GetRawButton(5))
+				rotation = .1;
+			else if(stick.GetRawButton(4))
+				rotation = -.1;
+			else
+				rotation =0;
+			myRobot.HolonomicDrive(stick.GetMagnitude(),stick.GetDirectionDegrees() ,rotation);
 			printf("Ultrasonic: %f ",usonic.GetVoltage());// drive with arcade style (use right stick)
 			printf("Gyro: %f \n",gyro.GetVoltage());
+			eds->SetDigitalOutput(10,true);
 			if(stick.GetTrigger())
 			{
+				eds->SetDigitalOutput(10,false);
 				spike.Set(Relay::kForward); //why deoesn't work 
 				wench.Set(1.0);
 			}
@@ -75,6 +112,8 @@ public:
 				spike.Set(Relay::kOff); //why deoesn't work 	
 			}
 			Wait(0.005);				// wait for a motor update time
+			//spike.Set(Relay::kReverse); //why deoesn't work 
+			
 		}
 	}
 };
