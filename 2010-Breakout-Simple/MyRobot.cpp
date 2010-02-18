@@ -55,9 +55,14 @@ public:
 	 */
 	void OperatorControl(void)
 	{
+		
 		//AxisCamera &camera = AxisCamera::GetInstance();
 		GetWatchdog().SetEnabled(true);
 		
+		DriverStationLCD *dsLCD = DriverStationLCD::GetInstance();
+		dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Hello World");
+		dsLCD->Printf(DriverStationLCD::kUser_Line1, 11, "Time: %4.1f", GetClock());
+		dsLCD->UpdateLCD();
 		/*eds->SetDigitalOutput(9,true);
 		 * eds->SetLED(down, false);
 	 
@@ -92,7 +97,7 @@ public:
 				rotation = -.1;
 			else
 				rotation =0;
-			myRobot.HolonomicDrive(stick.GetMagnitude(),stick.GetDirectionDegrees() ,rotation);
+			myRobot.HolonomicDrive(stick.GetMagnitude(),stick.GetDirectionDegrees() +90 ,rotation);
 			printf("Ultrasonic: %f ",usonic.GetVoltage());// drive with arcade style (use right stick)
 			printf("Gyro: %f \n",gyro.GetVoltage());
 			//eds->SetDigitalOutput(10,true);

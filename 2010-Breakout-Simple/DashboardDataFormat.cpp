@@ -9,7 +9,7 @@ void sendIOPortData() {
 			dash.AddCluster();
 			{
 				for (int i = 1; i <= 8; i++) {
-					//					dash.AddFloat((float) AnalogModule::GetInstance(1)->GetAverageVoltage(i));
+					//				dash.AddFloat((float) AnalogModule::GetInstance(1)->GetAverageVoltage(i));
 					dash.AddFloat((float) i * 5.0 / 8.0);
 				}
 			}		
