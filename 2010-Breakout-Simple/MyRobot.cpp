@@ -95,10 +95,10 @@ public:
 			myRobot.HolonomicDrive(stick.GetMagnitude(),stick.GetDirectionDegrees() ,rotation);
 			printf("Ultrasonic: %f ",usonic.GetVoltage());// drive with arcade style (use right stick)
 			printf("Gyro: %f \n",gyro.GetVoltage());
-			eds->SetDigitalOutput(10,true);
+			//eds->SetDigitalOutput(10,true);
 			if(stick.GetTrigger())
 			{
-				eds->SetDigitalOutput(10,false);
+				//eds->SetDigitalOutput(10,false);
 				spike.Set(Relay::kForward); //why deoesn't work 
 				wench.Set(1.0);
 			}
