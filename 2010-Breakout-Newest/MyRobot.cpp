@@ -24,6 +24,7 @@ class RobotDemo : public SimpleRobot
 	Victor BackLeft;
 	Victor FrontRight;
 	Victor BackRight;
+	DriverStationLCD *dsLCD;
 	
 	
 public:
@@ -41,15 +42,18 @@ public:
 		BackLeft(4),
 		FrontRight(7),
 		BackRight(8)
+		
 	{
+		dsLCD = DriverStationLCD::GetInstance();
 		ds = DriverStation::GetInstance();
 		eds = &(ds->GetEnhancedIO());
 		GetWatchdog().SetExpiration(0.1);
+		
 		myRobot.SetInvertedMotor(RobotDrive::kFrontLeftMotor,true);
 		myRobot.SetInvertedMotor(RobotDrive::kFrontRightMotor,true);
 		myRobot.SetInvertedMotor(RobotDrive::kRearRightMotor,true);
 		myRobot.SetInvertedMotor(RobotDrive::kRearLeftMotor,true);
-
+		
 	}
 
 	/**
@@ -58,11 +62,36 @@ public:
 	void Autonomous(void)
 	{
 		GetWatchdog().SetEnabled(false);
+		
 		myRobot.Drive(0.5, 0.0); 	// drive forwards half speed
-		Wait(2.0); 				//    for 2 seconds
+		Wait(1.0); 				//    for 1 seconds
 		myRobot.Drive(0.0, 0.0); 	// stop robot
+		switch (ds->GetLocation())  //returns int value 1,2 or 3 for starting postion
+		{
+			case 1:
+			Wait(1.0);
+			myRobot.Drive(0.5, 0.0);
+			spike.Set(Relay::kOn);
+			dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Case 1!!!");
+			break;
+			case 2:
+			Wait(4.0);
+			myRobot.Drive(0.5, 0.0);
+			spike.Set(Relay::kOn);
+			break;
+			case 3:
+			Wait(8.0);
+			myRobot.Drive(0.5, 0.0);
+			spike.Set(Relay::kOn);
+			break;
+			default:
+			dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "It's all your fault Devonte");
+			
+		}
+			
+		
 	}
-
+	
 	/**
 	 * Runs the motors with holonomic steering
 	 */
@@ -73,10 +102,9 @@ public:
 		camera.WriteCompression(20);
 		camera.WriteBrightness(0);
 		GetWatchdog().SetEnabled(true);
-		//DriverStationLCD *dsLCD = DriverStationLCD::GetInstance();
-		//dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Hello World");
-		//dsLCD->Printf(DriverStationLCD::kUser_Line1, 11, "Time: %4.1f", GetClock());
-		//dsLCD->UpdateLCD();
+		dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Hello World");
+		dsLCD->Printf(DriverStationLCD::kUser_Line1, 11, "Time: %4.1f", GetClock());
+		dsLCD->UpdateLCD();
 		
 		 /* eds->SetLED(down, false);
         
@@ -85,7 +113,6 @@ public:
 		while (IsOperatorControl())
 		{
 			GetWatchdog().Feed();
-			float rotation;
 			if(stick.GetRawButton(4))
 			{
 				FrontLeft.Set(-.75);
@@ -101,9 +128,11 @@ public:
 				BackRight.Set(-.75);
 			}
 			else
-				myRobot.HolonomicDrive(-stick.GetX(),rotation ,stick.GetY());
-			//myRobot.HolonomicDrive(-stick.GetX(),rotation ,stick.GetY());
-			//myRobot.ArcadeDrive(stick);
+				myRobot.ArcadeDrive(stick);
+			
+			//myRobot.HolonomicDrive(-stick.GetX(),0.0 ,stick.GetY()); 
+			
+			//myRobot.MecanumDrive_Polar(stick.GetMagnitude(),stick.GetDirectionRadians(),0);
 			printf("Ultrasonic: %f ",usonic.GetVoltage());// drive with arcade style (use right stick)
 			printf("Gyro: %f \n",gyro.GetVoltage());
 			if(stick.GetTrigger())
