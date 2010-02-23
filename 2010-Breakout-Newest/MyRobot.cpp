@@ -25,6 +25,7 @@ class RobotDemo : public SimpleRobot
 	Victor FrontRight;
 	Victor BackRight;
 	DriverStationLCD *dsLCD;
+	Timer kickTimer;
 	
 	
 public:
@@ -41,7 +42,8 @@ public:
 		FrontLeft(5),
 		BackLeft(4),
 		FrontRight(7),
-		BackRight(8)
+		BackRight(8),
+		kickTimer()
 		
 	{
 		dsLCD = DriverStationLCD::GetInstance();
@@ -69,27 +71,26 @@ public:
 		switch (ds->GetLocation())  //returns int value 1,2 or 3 for starting postion
 		{
 			case 1:
-			Wait(1.0);
 			myRobot.Drive(0.5, 0.0);
-			spike.Set(Relay::kOn);
-			dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Case 1!!!");
+			Wait(1.0);
+			myRobot.Drive(0.0, 0.0); 
+			dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Possition 1\n");
+			
 			break;
 			case 2:
 			Wait(4.0);
 			myRobot.Drive(0.5, 0.0);
-			spike.Set(Relay::kOn);
+			Wait(1.0);
+			myRobot.Drive(0.0, 0.0); 
+			dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Possition 2\n");
 			break;
 			case 3:
-			Wait(8.0);
 			myRobot.Drive(0.5, 0.0);
-			spike.Set(Relay::kOn);
-			break;
-			default:
-			dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "It's all your fault Devonte");
-			
+			Wait(8.0);
+			myRobot.Drive(0.0, 0.0); 
+			dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Possition 3\n");
+			break;			
 		}
-			
-		
 	}
 	
 	/**
@@ -102,14 +103,10 @@ public:
 		camera.WriteCompression(20);
 		camera.WriteBrightness(0);
 		GetWatchdog().SetEnabled(true);
-		dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Hello World");
-		dsLCD->Printf(DriverStationLCD::kUser_Line1, 11, "Time: %4.1f", GetClock());
-		dsLCD->UpdateLCD();
-		
-		 /* eds->SetLED(down, false);
-        
-		*/
-		 
+		//dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Hello World");
+		//dsLCD->Printf(DriverStationLCD::kUser_Line1, 11, "Time: %4.1f", GetClock());
+		//dsLCD->UpdateLCD();
+				 
 		while (IsOperatorControl())
 		{
 			GetWatchdog().Feed();
@@ -119,6 +116,7 @@ public:
 				BackLeft.Set(.75);
 				FrontRight.Set(-.75);
 				BackRight.Set(.75);
+				dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Left Button\n");
 			}
 			else if(stick.GetRawButton(5))
 			{
@@ -126,21 +124,39 @@ public:
 				BackLeft.Set(-.75);
 				FrontRight.Set(.75);
 				BackRight.Set(-.75);
+				dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Right Button\n");
+			}
+			else if(stick.GetRawButton(3))
+			{
+				dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "Calm down Devante\n");
 			}
 			else
 				myRobot.ArcadeDrive(stick);
 			
-			//myRobot.HolonomicDrive(-stick.GetX(),0.0 ,stick.GetY()); 
 			
+			//myRobot.HolonomicDrive(-stick.GetX(),0.0 ,stick.GetY()); 	
 			//myRobot.MecanumDrive_Polar(stick.GetMagnitude(),stick.GetDirectionRadians(),0);
 			printf("Ultrasonic: %f ",usonic.GetVoltage());// drive with arcade style (use right stick)
 			printf("Gyro: %f \n",gyro.GetVoltage());
-			if(stick.GetTrigger())
+			if(stick.GetTrigger() && (kickTimer.Get() == 0)) //If timer is at zero
 			{
+				kickTimer.Start();
 				spike.Set(Relay::kForward); //why deoesn't work 
 				wench.Set(1.0);
 			}
-			if(KickerLimit.Get())
+			if(kickTimer.Get() >0.25)
+			{
+				spike.Set(Relay::kReverse); //why deoesn't work 
+				wench.Set(0.0);
+			}
+			if(KickerBackLimit.Get() >0.5)
+			{
+				spike.Set(Relay::kOff); //why deoesn't work 
+				kickTimer.Stop();
+				kickTimer.Reset();
+			}
+			
+			/*if(KickerLimit.Get())
 			{
 				spike.Set(Relay::kReverse); //why deoesn't work 
 				wench.Set(0.0);
@@ -149,12 +165,10 @@ public:
 			{
 				spike.Set(Relay::kOff); //why deoesn't work 	
 			}
+			*/
+			dsLCD->UpdateLCD();
 			Wait(0.005);				// wait for a motor update time
-			//spike.Set(Relay::kReverse); //why deoesn't work 
-			
-
-						
-			
+			//spike.Set(Relay::kReverse); //why deoesn't work 		
 			
 		}
 	}
